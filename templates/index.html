@@ -1,0 +1,7 @@
+{{define "title"}}Simon's blog{{end}} {{define "body"}}
+<ul>
+  {{range .}}
+  <li><a href="/note/{{.Title}} | urlquery">{{.Title}}</a></li>
+  {{end}}
+</ul>
+{{end}}

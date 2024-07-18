@@ -2,21 +2,18 @@ package main
 
 import (
 	"log"
+	"net/http"
 
-	"github.com/scossar/zalgorithm-blog/utils"
+	"github.com/gorilla/mux"
+	"github.com/scossar/zalgorithm-blog/handlers"
 )
 
 func main() {
-	files, err := utils.FilesOfType("/home/scossar/obsidian_vault", "md")
-	if err != nil {
-		log.Fatalf("An error was returned from the call to FilesOfType: %v", err)
-	}
+	r := mux.NewRouter()
 
-	infos := utils.Info(files)
+	r.HandleFunc("/", handlers.IndexHandler)
 
-	for _, info := range infos {
-		log.Printf("name: %v", info.Name)
-		log.Printf("title: %v", info.Title)
-		log.Printf("path: %v", info.Path)
+	if err := http.ListenAndServe(":8080", r); err != nil {
+		log.Fatalf("Server failed to start: %v", err)
 	}
 }
