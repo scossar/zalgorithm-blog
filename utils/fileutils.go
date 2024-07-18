@@ -33,3 +33,23 @@ func Info(files []string) []FileInfo {
 	}
 	return fileInfos
 }
+
+type TitleAndSlug struct {
+	Title string
+	Slug  string
+}
+
+func TitlesAndSlugs(files []string) []TitleAndSlug {
+	var titlesAndSlugs []TitleAndSlug
+	for _, file := range files {
+		name := filepath.Base(file)
+		title := strings.TrimSuffix(name, filepath.Ext(name))
+		slug := strings.ReplaceAll(title, " ", "-")
+
+		titlesAndSlugs = append(titlesAndSlugs, TitleAndSlug{
+			Title: title,
+			Slug:  slug,
+		})
+	}
+	return titlesAndSlugs
+}

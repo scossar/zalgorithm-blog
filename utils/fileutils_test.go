@@ -118,3 +118,24 @@ func TestInfoDeepEqual(t *testing.T) {
 		}
 	}
 }
+
+func TestTitles(t *testing.T) {
+	files := []string{
+		"/files/test one.md",
+		"/files/test two.md",
+	}
+
+	titlesAndSlugs := TitlesAndSlugs(files)
+
+	expectedTitles := map[string]bool{"test one": true, "test two": true}
+	expectedSlugs := map[string]bool{"test-one": true, "test-two": true}
+
+	for _, titleAndSlug := range titlesAndSlugs {
+		if _, ok := expectedTitles[titleAndSlug.Title]; !ok {
+			t.Errorf("Unexpected title: %+v", titleAndSlug)
+		}
+		if _, ok := expectedSlugs[titleAndSlug.Slug]; !ok {
+			t.Errorf("Unexpected slug: %+v", titleAndSlug)
+		}
+	}
+}
