@@ -8,7 +8,7 @@ import (
 	"github.com/scossar/zalgorithm-blog/utils"
 )
 
-const notesDir = "/home/scossar/obsidian_vault"
+var notesDir = "/home/scossar/obsidian_vault"
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	mdFiles, err := utils.FilesOfType(notesDir, "md")
