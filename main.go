@@ -12,7 +12,7 @@ import (
 func main() {
 	realFileFetcher := utils.RealFileFetcher{}
 	notesDir := "/home/scossar/obsidian_vault"
-	handler := handlers.NewHandler(realFileFetcher, notesDir)
+	handler := handlers.NewIndexHandler(realFileFetcher, notesDir)
 	r := mux.NewRouter()
 
 	r.HandleFunc("/", handler.IndexHandler)

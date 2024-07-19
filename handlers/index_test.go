@@ -26,7 +26,7 @@ func TestMain(m *testing.M) {
 
 func TestIndexHandler(t *testing.T) {
 	mockFetcher := MockFileFetcher{}
-	handler := handlers.NewHandler(mockFetcher, "/mock/dir")
+	handler := handlers.NewIndexHandler(mockFetcher, "/mock/dir")
 
 	req, err := http.NewRequest("GET", "/", nil)
 	if err != nil {

@@ -13,7 +13,7 @@ type Handler struct {
 	NotesDir    string
 }
 
-func NewHandler(fileFetcher utils.FileFetcher, notesDir string) *Handler {
+func NewIndexHandler(fileFetcher utils.FileFetcher, notesDir string) *Handler {
 	return &Handler{FileFetcher: fileFetcher, NotesDir: notesDir}
 }
 
