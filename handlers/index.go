@@ -8,10 +8,18 @@ import (
 	"github.com/scossar/zalgorithm-blog/utils"
 )
 
-var notesDir = "/home/scossar/obsidian_vault"
+type Handler struct {
+	FileFetcher utils.FileFetcher
+	NotesDir    string
+}
 
-func IndexHandler(w http.ResponseWriter, r *http.Request) {
-	mdFiles, err := utils.FilesOfType(notesDir, "md")
+func NewHandler(fileFetcher utils.FileFetcher, notesDir string) *Handler {
+	return &Handler{FileFetcher: fileFetcher, NotesDir: notesDir}
+}
+
+func (h *Handler) IndexHandler(w http.ResponseWriter, r *http.Request) {
+	// mdFiles, err := utils.FilesOfType(notesDir, "md")
+	mdFiles, err := h.FileFetcher.FilesOfType(h.NotesDir, "md")
 	if err != nil {
 		log.Fatalf("Error returning markdown files: %v", err)
 	}

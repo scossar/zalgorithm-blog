@@ -5,8 +5,14 @@ import (
 	"strings"
 )
 
-func FilesOfType(dir string, ext string) ([]string, error) {
-	pattern := filepath.Join(dir, "*."+ext)
+type RealFileFetcher struct{}
+
+func (r RealFileFetcher) FilesOfType(dir, fileType string) ([]string, error) {
+	return FilesOfType(dir, fileType)
+}
+
+func FilesOfType(dir, fileType string) ([]string, error) {
+	pattern := filepath.Join(dir, "*."+fileType)
 	files, err := filepath.Glob(pattern)
 	if err != nil {
 		return nil, err
