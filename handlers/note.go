@@ -1,41 +1,52 @@
 package handlers
 
 import (
-	"fmt"
+	"database/sql"
 	"html/template"
 	"log"
 	"net/http"
-	"path/filepath"
-	"strings"
 
-	"github.com/gorilla/mux"
 	"github.com/scossar/zalgorithm-blog/utils"
 )
 
-type NoteHandler struct {
-	NotesDir string
-}
+type NoteHandler struct{}
 
-func NewNoteHandler(notesDir string) *NoteHandler {
-	return &NoteHandler{NotesDir: notesDir}
+func NewNoteHandler() *NoteHandler {
+	return &NoteHandler{}
 }
 
 func (h *NoteHandler) NoteHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	slug := vars["slug"]
-	fmt.Printf("Slug: %v", slug)
-	// TODO: tmp workaround
-	title := strings.ReplaceAll(slug, "-", " ")
-	filename := title + ".md"
-	filepath := filepath.Join(h.NotesDir, filename)
-	html := utils.MdFileToHTML(filepath)
+	id := r.PathValue("id")
+
+	db, err := sql.Open("sqlite3", "./notes.db")
+	if err != nil {
+		log.Fatalf("Error opening database file: %v", err)
+	}
+
+	defer db.Close()
+
+	noteQuery := `SELECT title, markdown FROM notes WHERE id = ?`
+	stmt, err := db.Prepare(noteQuery)
+	if err != nil {
+		log.Fatalf("Error preparing noteQuery: %v", err)
+	}
+
+	var title string
+	var markdown string
+	err = stmt.QueryRow(id).Scan(&title, &markdown)
+	if err != nil {
+		log.Fatalf("Error querying db: %v", err)
+	}
+
+	defer stmt.Close()
 
 	type Note struct {
 		Title string
-		Html  template.HTML
+		HTML  template.HTML
 	}
 
-	note := Note{Title: title, Html: template.HTML(html)}
+	html := utils.MDToHTML([]byte(markdown))
+	note := Note{Title: title, HTML: template.HTML(html)}
 	t, err := template.ParseFiles("templates/layout.html", "templates/note.html")
 	if err != nil {
 		log.Fatalf("Error parsing template: %v", err)

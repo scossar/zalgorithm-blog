@@ -13,7 +13,7 @@ func NewIndexHandler() *Handler {
 	return &Handler{}
 }
 
-func (h *Handler) IndexHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) Handler(w http.ResponseWriter, r *http.Request) {
 	db, err := sql.Open("sqlite3", "./notes.db")
 	if err != nil {
 		log.Fatalf("Error opening database file: %v", err)
