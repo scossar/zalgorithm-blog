@@ -12,26 +12,43 @@ import (
 	"github.com/scossar/zalgorithm-blog/utils"
 )
 
-func SeedDb(rootDir string) {
+func PrepareDB(rootDir string) {
 	db, err := sql.Open("sqlite3", "./notes.db")
 	checkErr((err))
-
 	defer db.Close()
 
-	createTableQuery := `
-  CREATE TABLE IF NOT EXISTS notes (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
-      slug TEXT NOT NULL,
-      markdown TEXT NOT NULL
-  );
-  CREATE TABLE IF NOT EXISTS version (
-      id INTEGER PRIMARY KEY,
-      version INTEGER PRIMARY KEY
-  )
-  `
-	_, err = db.Exec(createTableQuery)
+	ensureTablesExist(db)
+
+	seed(db, rootDir)
+
+	rows, err := db.Query("SELECT id, title, slug, markdown FROM notes")
 	checkErr(err)
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var id int
+		var title, slug, markdown string
+		err = rows.Scan(&id, &title, &slug, &markdown)
+		checkErr(err)
+		fmt.Printf("ID: %d\nTitle: %s\nSlug: %s\nMarkdown: %s\n", id, title, slug, markdown)
+	}
+
+	if err = rows.Err(); err != nil {
+		panic(err)
+	}
+}
+
+func seed(db *sql.DB, rootDir string) {
+	var version int
+	err := db.QueryRow("SELECT version FROM version WHERE id = 1").Scan(&version)
+	if err != nil && err != sql.ErrNoRows {
+		panic(err)
+	}
+
+	if version == 1 {
+		return
+	}
 
 	mdFiles, err := utils.FilesOfType(rootDir, "md")
 	checkErr(err)
@@ -46,31 +63,31 @@ func SeedDb(rootDir string) {
 		re := regexp.MustCompile(`[^\w-]+`)
 		slug = re.ReplaceAllString(slug, "")
 		slug = strings.ToLower(slug)
-		insert(md, title, slug)
-
+		insert(db, md, title, slug)
 	}
 
-	rows, err := db.Query("SELECT id, title, markdown FROM notes")
+	_, err = db.Exec("INSERT OR REPLACE INTO version (id, version) VALUES (1, 1)")
 	checkErr(err)
-
-	defer rows.Close()
-
-	for rows.Next() {
-		var id int
-		var title, markdown string
-		err = rows.Scan(&id, &title, &markdown)
-		checkErr(err)
-		fmt.Printf("ID: %d\nTitle: %s\nMarkdown: %s\n", id, title, markdown)
-	}
-
-	if err = rows.Err(); err != nil {
-		panic(err)
-	}
 }
 
-func insert(title, slug, md string) {
-	db, err := sql.Open("sqlite3", "./notes.db")
+func ensureTablesExist(db *sql.DB) {
+	createTableQuery := `
+  CREATE TABLE IF NOT EXISTS notes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      slug TEXT NOT NULL,
+      markdown TEXT NOT NULL
+  );
+  CREATE TABLE IF NOT EXISTS version (
+      id INTEGER PRIMARY KEY,
+      version INTEGER NOT NULL
+  )
+  `
+	_, err := db.Exec(createTableQuery)
 	checkErr(err)
+}
+
+func insert(db *sql.DB, title, slug, md string) {
 	insertNoteQuery := `INSERT INTO notes (title, slug, markdown) VALUES (?, ?, ?)`
 	stmt, err := db.Prepare(insertNoteQuery)
 	checkErr(err)

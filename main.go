@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	db.SeedDb("/home/scossar/obsidian_vault")
+	db.PrepareDB("/home/scossar/obsidian_vault")
 	realFileFetcher := utils.RealFileFetcher{}
 	notesDir := "/home/scossar/obsidian_vault"
 	handler := handlers.NewIndexHandler(realFileFetcher, notesDir)
