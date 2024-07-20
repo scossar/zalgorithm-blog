@@ -2,6 +2,7 @@ package utils
 
 import (
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -51,6 +52,9 @@ func TitlesAndSlugs(files []string) []TitleAndSlug {
 		name := filepath.Base(file)
 		title := strings.TrimSuffix(name, filepath.Ext(name))
 		slug := strings.ReplaceAll(title, " ", "-")
+		re := regexp.MustCompile(`[^\w-]+`)
+		slug = re.ReplaceAllString(slug, "")
+		slug = strings.ToLower(slug)
 
 		titlesAndSlugs = append(titlesAndSlugs, TitleAndSlug{
 			Title: title,

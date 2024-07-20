@@ -5,14 +5,17 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/scossar/zalgorithm-blog/db"
 	"github.com/scossar/zalgorithm-blog/handlers"
 	"github.com/scossar/zalgorithm-blog/utils"
 )
 
 func main() {
+	db.SeedDb("/home/scossar/obsidian_vault")
 	realFileFetcher := utils.RealFileFetcher{}
 	notesDir := "/home/scossar/obsidian_vault"
 	handler := handlers.NewIndexHandler(realFileFetcher, notesDir)
+	// TODO: I don't think gorilla/mux is needed to deal with paths
 	r := mux.NewRouter()
 
 	r.HandleFunc("/", handler.IndexHandler)
