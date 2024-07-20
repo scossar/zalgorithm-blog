@@ -1,6 +1,7 @@
 package db
 
 import (
+	"bytes"
 	"database/sql"
 	"os"
 	"path/filepath"
@@ -36,9 +37,9 @@ func seed(db *sql.DB, rootDir string) {
 	checkErr(err)
 
 	for _, file := range mdFiles {
-		mdBytes, err := os.ReadFile(file)
+		fileBytes, err := os.ReadFile(file)
 		checkErr(err)
-		md := string(mdBytes)
+		md := string(stripFrontMatter(fileBytes))
 		name := filepath.Base(file)
 		title := strings.TrimSuffix(name, filepath.Ext(name))
 		slug := strings.ReplaceAll(title, " ", "-")
@@ -78,6 +79,15 @@ func insert(db *sql.DB, title, slug, md string) {
 
 	_, err = stmt.Exec(title, slug, md)
 	checkErr(err)
+}
+
+func stripFrontMatter(mdBytes []byte) []byte {
+	parts := bytes.SplitN(mdBytes, []byte("---\n"), 3)
+	if len(parts) == 3 {
+		return parts[2]
+	}
+
+	return mdBytes
 }
 
 func checkErr(err error) {
