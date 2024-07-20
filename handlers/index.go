@@ -27,10 +27,11 @@ func (h *Handler) IndexHandler(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 
 	type Note struct {
-		ID    int
 		Title string
 		Slug  string
+		ID    int
 	}
+
 	var notes []Note
 
 	for rows.Next() {
