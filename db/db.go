@@ -63,7 +63,7 @@ func seed(db *sql.DB, rootDir string) {
 		re := regexp.MustCompile(`[^\w-]+`)
 		slug = re.ReplaceAllString(slug, "")
 		slug = strings.ToLower(slug)
-		insert(db, md, title, slug)
+		insert(db, title, slug, md)
 	}
 
 	_, err = db.Exec("INSERT OR REPLACE INTO version (id, version) VALUES (1, 1)")
