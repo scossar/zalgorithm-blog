@@ -2,7 +2,6 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -21,22 +20,22 @@ func PrepareDB(rootDir string) {
 
 	seed(db, rootDir)
 
-	rows, err := db.Query("SELECT id, title, slug, markdown FROM notes")
-	checkErr(err)
-
-	defer rows.Close()
-
-	for rows.Next() {
-		var id int
-		var title, slug, markdown string
-		err = rows.Scan(&id, &title, &slug, &markdown)
-		checkErr(err)
-		fmt.Printf("ID: %d\nTitle: %s\nSlug: %s\nMarkdown: %s\n", id, title, slug, markdown)
-	}
-
-	if err = rows.Err(); err != nil {
-		panic(err)
-	}
+	// rows, err := db.Query("SELECT id, title, slug, markdown FROM notes")
+	// checkErr(err)
+	//
+	// defer rows.Close()
+	//
+	// for rows.Next() {
+	// 	var id int
+	// 	var title, slug, markdown string
+	// 	err = rows.Scan(&id, &title, &slug, &markdown)
+	// 	checkErr(err)
+	// 	fmt.Printf("ID: %d\nTitle: %s\nSlug: %s\nMarkdown: %s\n", id, title, slug, markdown)
+	// }
+	//
+	// if err = rows.Err(); err != nil {
+	// 	panic(err)
+	// }
 }
 
 func seed(db *sql.DB, rootDir string) {

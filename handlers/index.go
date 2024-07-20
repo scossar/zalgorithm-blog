@@ -1,37 +1,62 @@
 package handlers
 
 import (
+	"database/sql"
 	"html/template"
 	"log"
 	"net/http"
-
-	"github.com/scossar/zalgorithm-blog/utils"
 )
 
-type Handler struct {
-	FileFetcher utils.FileFetcher
-	NotesDir    string
-}
+type Handler struct{}
 
-func NewIndexHandler(fileFetcher utils.FileFetcher, notesDir string) *Handler {
-	return &Handler{FileFetcher: fileFetcher, NotesDir: notesDir}
+func NewIndexHandler() *Handler {
+	return &Handler{}
 }
 
 func (h *Handler) IndexHandler(w http.ResponseWriter, r *http.Request) {
-	// mdFiles, err := utils.FilesOfType(notesDir, "md")
-	mdFiles, err := h.FileFetcher.FilesOfType(h.NotesDir, "md")
+	db, err := sql.Open("sqlite3", "./notes.db")
 	if err != nil {
-		log.Fatalf("Error returning markdown files: %v", err)
+		log.Fatalf("Error opening database file: %v", err)
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT id, title, slug FROM notes")
+	if err != nil {
+		log.Fatalf("Error obtaining rows from db: %v", err)
+	}
+	defer rows.Close()
+
+	type Note struct {
+		ID    int
+		Title string
+		Slug  string
+	}
+	var notes []Note
+
+	for rows.Next() {
+		var id int
+		var title, slug string
+		err := rows.Scan(&id, &title, &slug)
+		if err != nil {
+			log.Fatalf("Error scanning row: %v", err)
+		}
+		notes = append(notes, Note{
+			ID:    id,
+			Title: title,
+			Slug:  slug,
+		})
 	}
 
-	titlesAndSlugs := utils.TitlesAndSlugs(mdFiles)
+	if err = rows.Err(); err != nil {
+		log.Fatalf("Error scanning rows: %v", err)
+	}
 
 	t, err := template.ParseFiles("templates/layout.html", "templates/index.html")
 	if err != nil {
 		log.Fatalf("Error parsing template: %v", err)
 	}
 
-	err = t.Execute(w, titlesAndSlugs)
+	err = t.Execute(w, notes)
 	if err != nil {
 		log.Fatalf("Error executing template: %v", err)
 	}

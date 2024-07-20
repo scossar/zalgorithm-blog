@@ -1,7 +1,7 @@
 {{define "title"}}Simon's blog{{end}} {{define "body"}}
 <ul>
   {{range .}}
-  <li><a href="/note/{{.Slug}}">{{.Title}}</a></li>
+  <li><a href="/note/{{.Slug}}/{{.ID}}">{{.Title}}</a></li>
   {{end}}
 </ul>
 {{end}}
